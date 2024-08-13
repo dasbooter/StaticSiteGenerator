@@ -1,30 +1,21 @@
+from markdown_utilities import copy_static_files
+from markdown_core import generate_page
+
 import os
-import shutil
-
-def copy_static_files(src, dest):
-    if os.path.exists(dest):
-        shutil.rmtree(dest)
-    os.makedirs(dest)
-
-    for item in os.listdir(src):
-        src_path = os.path.join(src, item)
-        dest_path = os.path.join(dest, item)
-
-        if os.path.isdir(src_path):
-            # Recursively copy directory
-            print(f"Copying directory {src_path} to {dest_path}")
-            copy_static_files(src_path, dest_path)
-        else:
-            # Copy file
-            print(f"Copying file {src_path} to {dest_path}")
-            shutil.copy(src_path, dest_path)
 
 def main():
-    src_dir = 'static'
-    dest_dir = 'public'
+    # Define paths
+    static_dir = "static"
+    public_dir = "public"
+    content_dir = "content"
+    template_path = "template.html"
+    output_path = os.path.join(public_dir, "index.html")
 
-    copy_static_files(src_dir, dest_dir)
-    print("Static files copied successfully!")
+    # Copy static files
+    copy_static_files(static_dir, public_dir)
+
+    # Generate the HTML page
+    generate_page(os.path.join(content_dir, "index.md"), template_path, output_path)
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,5 @@
-from markdown_utilities import extract_markdown_images, extract_markdown_links
+import os
+from markdown_utilities import extract_title, extract_markdown_images, extract_markdown_links
 from textnode import text_to_textnodes, block_to_block_type, markdown_to_blocks, text_node_to_html_node
 from htmlnode import ParentNode, LeafNode
 
@@ -16,8 +17,9 @@ def create_code_block_node(block):
     return ParentNode(tag="pre", children=[ParentNode(tag="code", children=[LeafNode(value=block.strip("`"))])])
 
 def create_quote_node(block):
+    # Remove leading `>` characters and process the rest as plain text
     content = "\n".join([line.lstrip("> ").strip() for line in block.splitlines()])
-    return ParentNode(tag="blockquote", children=[create_paragraph_node(content)])
+    return LeafNode(tag="blockquote", value=content)
 
 def create_unordered_list_node(block):
     list_items = block.splitlines()
@@ -49,3 +51,34 @@ def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     block_nodes = [block_to_html_node(block) for block in blocks]
     return ParentNode(tag="div", children=block_nodes)
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+
+    # Read the markdown file
+    with open(from_path, 'r') as f:
+        markdown_content = f.read()
+
+    # Read the template file
+    with open(template_path, 'r') as f:
+        template_content = f.read()
+
+    # Convert markdown to HTML
+    html_node = markdown_to_html_node(markdown_content)
+    html_content = html_node.to_html()
+
+    # Extract title
+    title = extract_title(markdown_content)
+
+    # Replace placeholders in the template
+    final_content = template_content.replace("{{ Title }}", title)
+    final_content = final_content.replace("{{ Content }}", html_content)
+
+    # Ensure the destination directory exists
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+
+    # Write the final HTML to the destination file
+    with open(dest_path, 'w') as f:
+        f.write(final_content)
+
+    print(f"Page generated at {dest_path}")

@@ -2,7 +2,8 @@
 
 import unittest
 from textnode import TextNode, text_to_textnodes, split_nodes_delimiter, split_nodes_image, split_nodes_link, text_node_to_html_node, markdown_to_blocks, block_to_block_type
-from markdown_utilities import extract_markdown_images, extract_markdown_links
+from markdown_utilities import extract_markdown_images, extract_markdown_links, extract_title
+
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -400,6 +401,21 @@ class TestBlockToBlockType(unittest.TestCase):
 
         block = "This is a paragraph with multiple lines.\nIt should still be recognized as a paragraph."
         self.assertEqual(block_to_block_type(block), "paragraph")
+
+class TestExtractTitle(unittest.TestCase):
+
+    def test_extract_title_with_h1(self):
+        markdown = "# Hello World"
+        self.assertEqual(extract_title(markdown), "Hello World")
+
+    def test_extract_title_with_extra_whitespace(self):
+        markdown = "#   Hello World   "
+        self.assertEqual(extract_title(markdown), "Hello World")
+
+    def test_extract_title_no_h1(self):
+        markdown = "## Hello World"
+        with self.assertRaises(ValueError):
+            extract_title(markdown)
 
 if __name__ == "__main__":
     unittest.main()
